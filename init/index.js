@@ -47,7 +47,7 @@
 
 
 const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first"); // এটি DNS ECONNREFUSED এরর সম্পূর্ণ বন্ধ করে দেবে
+dns.setDefaultResultOrder("ipv4first");
 
 require("dotenv").config({ path: "../.env" });
 const mongoose = require("mongoose");
