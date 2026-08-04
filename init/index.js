@@ -1,88 +1,51 @@
-// const mongoose = require("mongoose");
-// const initData = require("./data.js");
-// const Listing = require("../models/listing.js");
-// const User = require("../models/user.js");
-
-// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
-// main()
-//   .then(() => {
-//     console.log("connected to DB");
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
-
-// async function main() {
-//   await mongoose.connect(MONGO_URL);
-// }
-
-// const initDB = async () => {
-//   // ১. পুরনো সব Listing এবং wanderDeepsikha ইউজার থাকলে তা পরিষ্কার করা হচ্ছে
-//   await Listing.deleteMany({});
-//   await User.deleteMany({ username: "wanderDeepsikha" });
-
-//   // ২. Passport দিয়ে সঠিকভাবে 'wanderDeepsikha' ইউজার তৈরি করা হচ্ছে
-//   const newUser = new User({
-//     email: "wanderdeepsikha@gmail.com",
-//     username: "wanderDeepsikha",
-//   });
-  
-//   const registeredUser = await User.register(newUser, "wander");
-//   console.log("👤 New User Registered: wanderDeepsikha");
-
-//   // ৩. সব sample listings-এর Owner হিসেবে wanderDeepsikha-কে লিঙ্ক করা হচ্ছে
-//   initData.data = initData.data.map((obj) => ({
-//     ...obj,
-//     owner: registeredUser._id,
-//   }));
-
-//   await Listing.insertMany(initData.data);
-//   console.log("✅ All listings are now owned by wanderDeepsikha!");
-  
-//   mongoose.connection.close();
-// };
-
-// initDB();
-
-
+// Windows DNS Lookup Fix
 const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-require("dotenv").config({ path: "../.env" });
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
+const User = require("../models/user.js");
 
-const dbUrl = "mongodb+srv://panideepsikha2006_db_user:dyQ8m7WJgNLkge0d@cluster0.uxr4zy5.mongodb.net/wanderlust?retryWrites=true&w=majority";
+// Atlas DB Connection String
+const dbUrl = process.env.ATLASDB_URL || "mongodb+srv://panideepsikha2006_db_user:dyQ8m7WJgNLkge0d@cluster0.uxr4zy5.mongodb.net/wanderlust?retryWrites=true&w=majority";
+
+main()
+  .then(() => {
+    console.log("Connected to DB successfully!");
+  })
+  .catch((err) => {
+    console.log("DB Connection Error:", err);
+  });
 
 async function main() {
-  try {
-    console.log("Connecting to MongoDB Atlas...");
-    await mongoose.connect(dbUrl);
-    console.log("Connected to Atlas DB successfully!");
-    
-    await initDB();
-  } catch (err) {
-    console.log("DB Connection Error:", err);
-  }
+  await mongoose.connect(dbUrl);
 }
 
 const initDB = async () => {
-  try {
-    await Listing.deleteMany({});
-    
-    initData.data = initData.data.map((obj) => ({
-      ...obj,
-      owner: "664b4bc3c2d49c690a7d2e85", // Valid User ID
-    }));
-    
-    await Listing.insertMany(initData.data);
-    console.log("Data was successfully initialized to Cloud Atlas!");
-    process.exit(0);
-  } catch (err) {
-    console.log("Data Insert Error:", err);
-  }
+  // ১. আগের সব লিস্টিং এবং ইউজার পরিষ্কার করা
+  await Listing.deleteMany({});
+  await User.deleteMany({ username: "deepsikhaWander" });
+
+  // ২. deepsikhaWander ইউজার তৈরি করা (Password: hello123)
+  const newUser = new User({
+    email: "deepsikha@gmail.com",
+    username: "deepsikhaWander"
+  });
+  
+  const registeredOwner = await User.register(newUser, "hello123");
+  console.log("Created Owner Account -> Username: deepsikhaWander | Password: hello123");
+
+  // ৩. ১৫টি লিস্টিং-এ deepsikhaWander এর ID যুক্ত করা
+  initData.data = initData.data.map((obj) => ({
+    ...obj,
+    owner: registeredOwner._id,
+  }));
+
+  await Listing.insertMany(initData.data);
+  console.log("Data was initialized with 15 listings owned by deepsikhaWander!");
+  
+  mongoose.connection.close();
 };
 
-main();
+initDB();

@@ -12,7 +12,7 @@
             alt="listing_image"
         >
         <div class="card-body">
-            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "Deepsikha Pani" %></i></p>
+            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "wanderDeepsikha" %></i></p>
 
             <!-- 🏷️ Category Text -->
             <% if(listing.category) { %>
@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <!-- 🛠️ Action Buttons (Only for Listing Owner) -->
+    <!-- 🛠️ Action Buttons (Only for Listing Owner - e.g. wanderDeepsikha) -->
     <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
         <div class="btns col-6 offset-3 d-flex gap-2 mt-2 mb-3">
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn">
@@ -41,7 +41,7 @@
         </div>
     <% } %>
 
-    <!-- 📅 Standard Booking Card (Only Visible to Non-Owners) -->
+    <!-- 📅 Standard Booking Card (Visible to Everyone Except Owner) -->
     <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
         <div class="col-6 offset-3 mb-4 mt-2">
             <div class="card p-3 shadow-sm border rounded-4">
@@ -53,7 +53,7 @@
                         Please <a href="/login" class="alert-link">Log in</a> to reserve this listing.
                     </div>
                 <% } else { %>
-                    <!-- Other Logged-in Users -->
+                    <!-- Logged-in Non-Owner Users -->
                     <form action="/listings/<%= listing._id %>/book" method="POST" class="needs-validation" novalidate>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
@@ -186,7 +186,7 @@
 
             if (nights > 0) {
                 const base = pricePerNight * nights;
-                const gst = Math.round(base * 0.18); // 18% GST
+                const gst = Math.round(base * 0.18);
                 const total = base + gst;
 
                 document.getElementById("night-calc").innerText = `₹${pricePerNight.toLocaleString('en-IN')} x ${nights} night${nights > 1 ? 's' : ''}`;
