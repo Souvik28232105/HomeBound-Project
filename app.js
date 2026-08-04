@@ -1,4 +1,8 @@
-if(process.env.NODE_ENV != "production"){
+// DNS lookup error (ECONNREFUSED) সমাধান করার জন্য
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
+if (process.env.NODE_ENV != "production") {
     require('dotenv').config();
 }
 
@@ -10,6 +14,11 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
+
+// Safe MongoStore Import (CommonJS / v5+ Fix)
+const connectMongo = require("connect-mongo");
+const MongoStore = connectMongo.default || connectMongo;
+
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -20,18 +29,19 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const bookingRouter = require("./routes/booking.js");
 
-const MONGOURL = "mongodb://127.0.0.1:27017/wanderlust";
+// Fallback logic for local database
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
 
 main()
     .then(() => {
-        console.log("Connected to DB");
+        console.log("Connected to DB successfully!");
     })
     .catch((err) => {
-        console.log(err);
+        console.log("DB Connection Error:", err);
     });
 
 async function main() {
-    await mongoose.connect(MONGOURL);
+    await mongoose.connect(dbUrl);
 }
 
 // Configuration & Basic Middleware
@@ -42,9 +52,25 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+// Session Store Setup
+const secretKey = process.env.SECRET || "mysupersecretcode";
+
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+        secret: secretKey,
+    },
+    touchAfter: 24 * 3600,
+});
+
+store.on("error", (err) => {
+    console.log("ERROR in MONGO SESSION STORE:", err);
+});
+
 // Session Configuration
 const sessionOptions = {
-    secret: "mysupersecretcode",
+    store: store,
+    secret: secretKey,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -74,6 +100,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Root Route
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 // Demo User Route
 app.get("/demouser", async (req, res) => {
     let fakeUser = new User({
@@ -90,7 +121,7 @@ app.use("/listings/:id/reviews", reviewRouter);
 app.use("/listings/:id/book", bookingRouter);
 app.use("/", userRouter);
 
-// 404 Catch-All Route (FIXED: app.use without wildcard string to avoid PathError in Node v24/Express v5)
+// 404 Catch-All Route
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found"));
 });
@@ -101,6 +132,8 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(8080, () => {
-    console.log("Server is listening on port 8080");
+// Port setup
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
 });
