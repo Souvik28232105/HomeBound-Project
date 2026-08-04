@@ -1,0 +1,281 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    /* -----------------------------------
+       1. Filters Container & Scroll Arrows
+    ----------------------------------- */
+    #filters-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    #filters-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0.5rem 0 1rem 0;
+        width: 100%;
+    }
+
+    /* Scroll Buttons */
+    .scroll-btn {
+        border: 1px solid #d1d1d1;
+        background-color: #ffffff;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 5;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .scroll-btn:hover {
+        scale: 1.1;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        border-color: #222;
+    }
+
+    /* Scrollable Filters Bar */
+    #filters {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        align-items: center;
+        gap: 2rem;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding-bottom: 0.2rem;
+        scroll-behavior: smooth; /* Smooth scrolling animation */
+        flex-grow: 1;
+    }
+
+    #filters::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+
+    .filter {
+        text-align: center;
+        opacity: 0.65;
+        cursor: pointer;
+        text-decoration: none !important;
+        color: #222222;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+    }
+
+    .filter i {
+        font-size: 1.3rem;
+    }
+
+    .filter p {
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .filter:hover {
+        opacity: 1;
+        color: #fe424d;
+    }
+
+    .filter.active-filter {
+        opacity: 1;
+        border-bottom: 2.5px solid #fe424d;
+        color: #fe424d;
+        font-weight: 600;
+        padding-bottom: 0.2rem;
+    }
+
+    /* -----------------------------------
+       2. Listing Cards & Permanent GST Badge
+    ----------------------------------- */
+    .listing-link {
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+    .listing-card {
+        border: none !important;
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 1.75rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .listing-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-img-top {
+        border-radius: 1rem !important;
+        height: 19rem !important;
+        object-fit: cover;
+    }
+
+    /* Permanently Visible Tax Badge */
+    .tax-badge {
+        color: #fe424d;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+</style>
+
+<!-- Category Filters Bar with Left/Right Arrows -->
+<div id="filters-container" class="mt-2">
+    <div id="filters-wrapper">
+        <!-- ◀️ Left Scroll Arrow -->
+        <button class="scroll-btn" id="slideLeft">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Scrollable Icons Bar -->
+        <div id="filters">
+            <a href="/listings" class="filter <%= !activeCategory ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-compass"></i></div>
+                <p>All</p>
+            </a>
+            <a href="/listings?category=trending" class="filter <%= activeCategory === 'trending' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-fire"></i></div>
+                <p>Trending</p>
+            </a>
+            <a href="/listings?category=rooms" class="filter <%= activeCategory === 'rooms' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-bed"></i></div>
+                <p>Rooms</p>
+            </a>
+            <a href="/listings?category=iconic cities" class="filter <%= activeCategory === 'iconic cities' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-mountain-city"></i></div>
+                <p>Iconic Cities</p>
+            </a>
+            <a href="/listings?category=mountains" class="filter <%= activeCategory === 'mountains' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-mountain"></i></div>
+                <p>Mountains</p>
+            </a>
+            <a href="/listings?category=castles" class="filter <%= activeCategory === 'castles' ? 'active-filter' : '' %>">
+                <div><i class="fa-brands fa-fort-awesome"></i></div>
+                <p>Castles</p>
+            </a>
+            <a href="/listings?category=pools" class="filter <%= activeCategory === 'pools' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-person-swimming"></i></div>
+                <p>Amazing Pools</p>
+            </a>
+            <a href="/listings?category=camping" class="filter <%= activeCategory === 'camping' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-campground"></i></div>
+                <p>Camping</p>
+            </a>
+            <a href="/listings?category=farms" class="filter <%= activeCategory === 'farms' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-cow"></i></div>
+                <p>Farms</p>
+            </a>
+            <a href="/listings?category=domes" class="filter <%= activeCategory === 'domes' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-igloo"></i></div>
+                <p>Domes</p>
+            </a>
+            <a href="/listings?category=arctic" class="filter <%= activeCategory === 'arctic' ? 'active-filter' : '' %>">
+                <div><i class="fa-regular fa-snowflake"></i></div>
+                <p>Arctic</p>
+            </a>
+            <a href="/listings?category=boats" class="filter <%= activeCategory === 'boats' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-sailboat"></i></div>
+                <p>Boats</p>
+            </a>
+            <a href="/listings?category=beach" class="filter <%= activeCategory === 'beach' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-umbrella-beach"></i></div>
+                <p>Beachfront</p>
+            </a>
+            <a href="/listings?category=islands" class="filter <%= activeCategory === 'islands' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-water"></i></div>
+                <p>Islands</p>
+            </a>
+            <a href="/listings?category=tropical" class="filter <%= activeCategory === 'tropical' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-tree"></i></div>
+                <p>Tropical</p>
+            </a>
+            <a href="/listings?category=deserts" class="filter <%= activeCategory === 'deserts' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-sun"></i></div>
+                <p>Deserts</p>
+            </a>
+            <a href="/listings?category=golfing" class="filter <%= activeCategory === 'golfing' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-golf-ball-tee"></i></div>
+                <p>Golfing</p>
+            </a>
+            <a href="/listings?category=skiing" class="filter <%= activeCategory === 'skiing' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-person-skiing"></i></div>
+                <p>Skiing</p>
+            </a>
+            <a href="/listings?category=houseboats" class="filter <%= activeCategory === 'houseboats' ? 'active-filter' : '' %>">
+                <div><i class="fa-solid fa-ship"></i></div>
+                <p>Houseboats</p>
+            </a>
+        </div>
+
+        <!-- ▶️ Right Scroll Arrow -->
+        <button class="scroll-btn" id="slideRight">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Listings Cards Row -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-2">
+    <% if(allListings.length === 0) { %>
+        <div class="col-12 my-5 text-center">
+            <i class="fa-solid fa-magnifying-glass-location text-muted fa-3x mb-3"></i>
+            <h4 class="text-muted fw-normal">No listings found!</h4>
+            <p class="text-secondary small">Try searching for something else or reset filters.</p>
+            <a href="/listings" class="btn btn-outline-danger btn-sm mt-2 px-4 rounded-pill">View All Listings</a>
+        </div>
+    <% } %>
+
+    <% for(let listing of allListings) { %>
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+            <div class="card col listing-card">
+                <div class="overflow-hidden rounded-4">
+                    <img 
+                        src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' %>" 
+                        class="card-img-top" 
+                        alt="listing_image"
+                    >
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <b><%= listing.title %></b> <br>
+                        <span class="text-secondary">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %></span> / night
+                        <span class="tax-badge">+18% GST</span>
+                    </p>
+                </div>
+            </div>
+        </a>
+    <% } %>
+</div>
+
+<!-- ⚡ JavaScript Logic for Scroll Arrows -->
+<script>
+    const filtersBar = document.getElementById("filters");
+    const slideLeftBtn = document.getElementById("slideLeft");
+    const slideRightBtn = document.getElementById("slideRight");
+
+    slideLeftBtn.addEventListener("click", () => {
+        filtersBar.scrollBy({ left: -300, behavior: 'smooth' });
+    });
+
+    slideRightBtn.addEventListener("click", () => {
+        filtersBar.scrollBy({ left: 300, behavior: 'smooth' });
+    });
+</script>
+

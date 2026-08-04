@@ -1,0 +1,209 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-3">
+    <div class="col-8 offset-3">
+        <h3><%= listing.title %></h3>
+    </div>
+
+    <div class="card col-6 offset-3 show-card listing-card">
+        <img 
+            src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' %>" 
+            class="card-img-top show-img" 
+            alt="listing_image"
+        >
+        <div class="card-body">
+            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "Deepsikha Pani" %></i></p>
+
+            <!-- 🏷️ Category Text -->
+            <% if(listing.category) { %>
+                <p class="card-text text-capitalize">
+                    Category: <%= listing.category %>
+                </p>
+            <% } %>
+
+            <p class="card-text"><%= listing.description %></p>
+            <p class="card-text">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %> / night </p>
+            <p class="card-text"><%= listing.location %></p>
+            <p class="card-text"><%= listing.country %></p>
+        </div>
+    </div>
+
+    <!-- 🛠️ Action Buttons (Only for Listing Owner) -->
+    <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
+        <div class="btns col-6 offset-3 d-flex gap-2 mt-2 mb-3">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn">
+                Edit
+            </a>
+
+            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                <button class="btn btn-dark">Delete</button>
+            </form>
+        </div>
+    <% } %>
+
+    <!-- 📅 Standard Booking Card (Only Visible to Non-Owners) -->
+    <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
+        <div class="col-6 offset-3 mb-4 mt-2">
+            <div class="card p-3 shadow-sm border rounded-4">
+                <h4 class="mb-3">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %> <small class="text-muted fw-normal">/ night</small></h4>
+                
+                <% if(!currUser) { %>
+                    <!-- Logged Out User -->
+                    <div class="alert alert-warning text-center m-0" role="alert">
+                        Please <a href="/login" class="alert-link">Log in</a> to reserve this listing.
+                    </div>
+                <% } else { %>
+                    <!-- Other Logged-in Users -->
+                    <form action="/listings/<%= listing._id %>/book" method="POST" class="needs-validation" novalidate>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label for="checkIn" class="form-label small fw-bold">CHECK-IN</label>
+                                <input type="date" id="checkIn" name="booking[checkIn]" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="checkOut" class="form-label small fw-bold">CHECKOUT</label>
+                                <input type="date" id="checkOut" name="booking[checkOut]" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="guests" class="form-label small fw-bold">GUESTS</label>
+                            <input type="number" id="guests" name="booking[guests]" class="form-control" min="1" max="10" value="1" required>
+                        </div>
+
+                        <!-- Automatic GST & Total Amount Breakdown -->
+                        <div id="price-summary" class="mb-3 p-2 bg-light rounded" style="display: none;">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span id="night-calc">₹0 x 0 nights</span>
+                                <span id="base-price">₹0</span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>GST (18%)</span>
+                                <span id="gst-price">₹0</span>
+                            </div>
+                            <hr class="my-1">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total Amount</span>
+                                <span id="total-price" class="text-danger">₹0</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" style="background-color: #fe424d; border: none;">
+                            Reserve
+                        </button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Review Section -->
+    <div class="col-8 offset-3 mb-3">
+        <hr> 
+        <% if(currUser) { %>
+            <h4>Leave a Review</h4>
+            <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+                
+                <div class="mb-3 mt-3">
+                    <label class="form-label">Rating</label>
+                    <fieldset class="starability-slot">
+                        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+
+                        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                        <label for="first-rate5" title="Amazing">5 stars</label>
+
+                        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                        <label for="first-rate4" title="Very good">4 stars</label>
+
+                        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                        <label for="first-rate3" title="Average">3 stars</label>
+
+                        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                        <label for="first-rate2" title="Not good">2 stars</label>
+
+                        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                        <label for="first-rate1" title="Terrible">1 star</label>
+                    </fieldset>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="form-label">Comments</label>
+                    <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
+                    <div class="invalid-feedback">Please add some comments for review</div>
+                </div>
+                <button class="btn btn-outline-dark">Submit</button>
+            </form>
+            <hr>
+        <% } %>
+        
+        <!-- All Reviews Display -->
+        <% if(listing.reviews && listing.reviews.length > 0) { %>
+            <p><b>All Reviews</b></p>
+            <div class="row">
+                <% for(let review of listing.reviews) { %>
+                    <div class="card col-5 ms-3 mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">@<%= review.author ? review.author.username : "Anonymous" %></h5>
+                            
+                            <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+                            
+                            <p class="card-text"><%= review.comment %></p>
+                        </div>
+
+                        <% if(currUser && review.author && review.author._id.equals(currUser._id)) { %>
+                            <form class="mb-3 ms-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                                <button class="btn btn-sm btn-dark">Delete</button>
+                            </form>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+    </div> 
+
+    <!-- Map Section -->
+    <div class="col-8 offset-3 mb-3">
+        <h3>Where you'll be</h3>
+        <div id="map"></div>
+    </div>
+</div>
+
+<!-- Automatic Price & GST Calculator Script -->
+<script>
+    const listing = JSON.parse('<%- JSON.stringify(listing) %>');
+
+    const pricePerNight = Number("<%= listing.price %>") || 0;
+    const checkInInput = document.getElementById("checkIn");
+    const checkOutInput = document.getElementById("checkOut");
+    const summaryBox = document.getElementById("price-summary");
+
+    function calculateBookingTotal() {
+        if (checkInInput && checkOutInput && checkInInput.value && checkOutInput.value) {
+            const start = new Date(checkInInput.value);
+            const end = new Date(checkOutInput.value);
+            const timeDiff = end.getTime() - start.getTime();
+            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            if (nights > 0) {
+                const base = pricePerNight * nights;
+                const gst = Math.round(base * 0.18); // 18% GST
+                const total = base + gst;
+
+                document.getElementById("night-calc").innerText = `₹${pricePerNight.toLocaleString('en-IN')} x ${nights} night${nights > 1 ? 's' : ''}`;
+                document.getElementById("base-price").innerText = `₹${base.toLocaleString('en-IN')}`;
+                document.getElementById("gst-price").innerText = `₹${gst.toLocaleString('en-IN')}`;
+                document.getElementById("total-price").innerText = `₹${total.toLocaleString('en-IN')}`;
+
+                summaryBox.style.display = "block";
+            } else {
+                summaryBox.style.display = "none";
+            }
+        }
+    }
+
+    if(checkInInput && checkOutInput) {
+        checkInInput.addEventListener("change", calculateBookingTotal);
+        checkOutInput.addEventListener("change", calculateBookingTotal);
+    }
+</script>
+<script src="/js/map.js"></script>
