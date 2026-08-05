@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <!-- Edit/Delete Buttons ONLY for the Listing Owner -->
+    <!-- Edit/Delete Buttons (ONLY for the Owner of THIS specific listing) -->
     <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
         <div class="btns col-6 offset-3 d-flex gap-2 mt-2 mb-3">
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn">Edit</a>
@@ -37,7 +37,7 @@
         </div>
     <% } %>
 
-    <!-- Booking Card for non-owners -->
+    <!-- Booking Card (Visible to Everyone EXCEPT the owner) -->
     <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
         <div class="col-6 offset-3 mb-4 mt-2">
             <div class="card p-3 shadow-sm border rounded-4">
@@ -65,6 +65,7 @@
                             <input type="number" id="guests" name="booking[guests]" class="form-control" min="1" max="10" value="1" required>
                         </div>
 
+                        <!-- Price Breakdown -->
                         <div id="price-summary" class="mb-3 p-2 bg-light rounded" style="display: none;">
                             <div class="d-flex justify-content-between small text-muted mb-1">
                                 <span id="night-calc">₹0 x 0 nights</span>
@@ -148,11 +149,11 @@
     <!-- Map Container -->
     <div class="col-8 offset-3 mb-3">
         <h3>Where you'll be</h3>
-        <div id="map" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;" class="shadow-sm border"></div>
+        <div id="map" style="height: 400px; width: 100%; border-radius: 12px; background: #e5e3df; overflow: hidden;" class="shadow-sm border"></div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- UPI Payment Modal -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center p-3">
@@ -187,9 +188,10 @@
   </div>
 </div>
 
-<!-- Safe HTML Data Container for JS -->
+<!-- Data Transport -->
 <div id="listing-data" data-listing='<%- JSON.stringify(listing) %>'></div>
 
+<!-- Booking Logic & Modal Trigger -->
 <script>
     const listingDataEl = document.getElementById("listing-data");
     const listing = JSON.parse(listingDataEl.dataset.listing);

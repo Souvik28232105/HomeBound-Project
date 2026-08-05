@@ -32,79 +32,99 @@
 
 
 
-// 1. Fetch listing data safely from HTML data-attribute
-const listingDataElement = document.getElementById("listing-data");
-let listing = {};
-
-if (listingDataElement && listingDataElement.dataset.listing) {
-    try {
-        listing = JSON.parse(listingDataElement.dataset.listing);
-    } catch (e) {
-        console.error("Error parsing listing data for map:", e);
+(function () {
+    // Leaflet CSS Dynamically Injecting to stop blank/white tile glitch
+    if (!document.getElementById("leaflet-css")) {
+        const link = document.createElement("link");
+        link.id = "leaflet-css";
+        link.rel = "stylesheet";
+        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+        document.head.appendChild(link);
     }
-}
 
-// 2. Prepare location query
-let locationStr = listing.location || "";
-let countryStr = listing.country || "";
-let searchQuery = `${locationStr}, ${countryStr}`.trim();
+    window.addEventListener("load", function () {
+        const listingDataElement = document.getElementById("listing-data");
+        let listing = {};
 
-// 3. Initialize Leaflet Map (Default center: Kolkata)
-const map = L.map('map').setView([22.5726, 88.3639], 10);
-
-// 4. OpenStreetMap Tile Layer
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-
-// 5. Red Marker Icon Definition
-const redIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
-// Function to Render Marker & Popup
-function renderMap(lat, lng) {
-    map.setView([lat, lng], 10);
-    
-    L.marker([lat, lng], { icon: redIcon }).addTo(map)
-        .bindPopup(
-            `<h4>${listing.location || listing.title || "Location"}</h4><p>Exact Location provided after booking</p>`
-        );
-}
-
-// 6. Check Coordinates or Geocode Location
-if (
-    listing.geometry && 
-    listing.geometry.coordinates && 
-    listing.geometry.coordinates.length === 2 &&
-    listing.geometry.coordinates[0] !== 0
-) {
-    let lng = listing.geometry.coordinates[0];
-    let lat = listing.geometry.coordinates[1];
-    renderMap(lat, lng);
-} else if (searchQuery) {
-    // Dynamic Fetch using OpenStreetMap Nominatim Geocoding API
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.length > 0) {
-                let lat = parseFloat(data[0].lat);
-                let lon = parseFloat(data[0].lon);
-                renderMap(lat, lon);
-            } else {
-                renderMap(22.5726, 88.3639);
+        if (listingDataElement && listingDataElement.dataset.listing) {
+            try {
+                listing = JSON.parse(listingDataElement.dataset.listing);
+            } catch (e) {
+                console.error("Error parsing listing data:", e);
             }
-        })
-        .catch(err => {
-            console.log("Map Geocoding Error:", err);
-            renderMap(22.5726, 88.3639);
+        }
+
+        const mapContainer = document.getElementById("map");
+        if (!mapContainer || typeof L === "undefined") return;
+
+        // Default Kolkata fallback coordinates [lat, lng]
+        let defaultLat = 22.5726;
+        let defaultLng = 88.3639;
+
+        // 1. Initialize Leaflet Map
+        const map = L.map('map', {
+            center: [defaultLat, defaultLng],
+            zoom: 10,
+            scrollWheelZoom: false
         });
-} else {
-    renderMap(22.5726, 88.3639);
-}
+
+        // 2. OpenStreetMap Tile Layer
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 3. Custom Red Marker Icon
+        const redIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        function plotMarker(lat, lng) {
+            map.setView([lat, lng], 11);
+            L.marker([lat, lng], { icon: redIcon }).addTo(map)
+                .bindPopup(`<b>${listing.title || listing.location || 'Location'}</b><br>Exact location provided after booking.`)
+                .openPopup();
+            
+            // Force Leaflet to recalculate container size & render tiles instantly
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 500);
+        }
+
+        // 4. Check Database Coordinates or Fetch Geocode
+        if (
+            listing.geometry && 
+            listing.geometry.coordinates && 
+            listing.geometry.coordinates.length === 2 &&
+            (listing.geometry.coordinates[0] !== 0 || listing.geometry.coordinates[1] !== 0)
+        ) {
+            let lng = listing.geometry.coordinates[0];
+            let lat = listing.geometry.coordinates[1];
+            plotMarker(lat, lng);
+        } else {
+            let locationStr = listing.location || "";
+            let countryStr = listing.country || "";
+            let searchQuery = `${locationStr}, ${countryStr}`.trim();
+
+            if (searchQuery) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            plotMarker(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                        } else {
+                            plotMarker(defaultLat, defaultLng);
+                        }
+                    })
+                    .catch(() => plotMarker(defaultLat, defaultLng));
+            } else {
+                plotMarker(defaultLat, defaultLng);
+            }
+        }
+    });
+})();
