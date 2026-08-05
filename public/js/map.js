@@ -37,7 +37,7 @@ let locationStr = listing.location || "";
 let countryStr = listing.country || "";
 let searchQuery = `${locationStr}, ${countryStr}`.trim();
 
-// 2. Initialize Leaflet Map with Default View (Temporary)
+// 2. Initialize Leaflet Map with Default View (Kolkata coordinates fallback)
 const map = L.map('map').setView([22.5726, 88.3639], 10);
 
 // 3. OpenStreetMap Tile Layer
@@ -86,7 +86,6 @@ if (
                 let lon = parseFloat(data[0].lon);
                 renderMap(lat, lon);
             } else {
-                // Default Fallback
                 renderMap(22.5726, 88.3639);
             }
         })
