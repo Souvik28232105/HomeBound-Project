@@ -12,9 +12,8 @@
             alt="listing_image"
         >
         <div class="card-body">
-            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "wanderDeepsikha" %></i></p>
+            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "deepsikhaWander" %></i></p>
 
-            <!-- 🏷️ Category Text -->
             <% if(listing.category) { %>
                 <p class="card-text text-capitalize">
                     Category: <%= listing.category %>
@@ -28,7 +27,7 @@
         </div>
     </div>
 
-    <!-- 🛠️ Action Buttons (Only for Listing Owner - e.g. wanderDeepsikha) -->
+    <!-- 🛠️ Edit/Delete Buttons (ONLY for the Owner of THIS specific listing) -->
     <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
         <div class="btns col-6 offset-3 d-flex gap-2 mt-2 mb-3">
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn">
@@ -41,7 +40,7 @@
         </div>
     <% } %>
 
-    <!-- 📅 Standard Booking Card (Visible to Everyone Except Owner) -->
+    <!-- 📅 Standard Booking Card (Visible to Everyone EXCEPT the owner of this listing) -->
     <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
         <div class="col-6 offset-3 mb-4 mt-2">
             <div class="card p-3 shadow-sm border rounded-4">
@@ -53,8 +52,8 @@
                         Please <a href="/login" class="alert-link">Log in</a> to reserve this listing.
                     </div>
                 <% } else { %>
-                    <!-- Logged-in Non-Owner Users -->
-                    <form action="/listings/<%= listing._id %>/book" method="POST" class="needs-validation" novalidate>
+                    <!-- Logged-in Non-Owner Users (Can be any user or an owner of another listing) -->
+                    <form id="bookingForm" action="/listings/<%= listing._id %>/book" method="POST" class="needs-validation" novalidate>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label for="checkIn" class="form-label small fw-bold">CHECK-IN</label>
@@ -88,8 +87,8 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" style="background-color: #fe424d; border: none;">
-                            Reserve
+                        <button type="button" id="payModalBtn" class="btn btn-danger w-100 py-2 fw-bold" style="background-color: #fe424d; border: none;">
+                            Reserve & Pay
                         </button>
                     </form>
                 <% } %>
@@ -103,24 +102,18 @@
         <% if(currUser) { %>
             <h4>Leave a Review</h4>
             <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
-                
                 <div class="mb-3 mt-3">
                     <label class="form-label">Rating</label>
                     <fieldset class="starability-slot">
                         <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-
                         <input type="radio" id="first-rate5" name="review[rating]" value="5" />
                         <label for="first-rate5" title="Amazing">5 stars</label>
-
                         <input type="radio" id="first-rate4" name="review[rating]" value="4" />
                         <label for="first-rate4" title="Very good">4 stars</label>
-
                         <input type="radio" id="first-rate3" name="review[rating]" value="3" />
                         <label for="first-rate3" title="Average">3 stars</label>
-
                         <input type="radio" id="first-rate2" name="review[rating]" value="2" />
                         <label for="first-rate2" title="Not good">2 stars</label>
-
                         <input type="radio" id="first-rate1" name="review[rating]" value="1" />
                         <label for="first-rate1" title="Terrible">1 star</label>
                     </fieldset>
@@ -144,9 +137,7 @@
                     <div class="card col-5 ms-3 mb-3">
                         <div class="card-body">
                             <h5 class="card-title">@<%= review.author ? review.author.username : "Anonymous" %></h5>
-                            
                             <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
-                            
                             <p class="card-text"><%= review.comment %></p>
                         </div>
 
@@ -168,14 +159,53 @@
     </div>
 </div>
 
-<!-- Automatic Price & GST Calculator Script -->
-<script>
-    const listing = JSON.parse('<%- JSON.stringify(listing) %>');
+<!-- 💳 Fake UPI Payment Modal showing Listing Owner's QR Scanner -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-3">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="paymentModalLabel">Scan Owner QR Code to Complete Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-1">Owner: <b><%= listing.owner ? listing.owner.username : "deepsikhaWander" %></b></p>
+        
+        <!-- Owner's Specific QR Code Image -->
+        <div class="my-3">
+            <img 
+                id="modalQrCode" 
+                src="<%= (listing.qrCode && listing.qrCode.url) ? listing.qrCode.url : 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deepsikha@upi&pn=WanderLust' %>" 
+                alt="Owner Payment Scanner" 
+                class="img-fluid border p-2 rounded shadow-sm" 
+                style="max-width: 220px;"
+            >
+        </div>
 
+        <div class="alert alert-info py-2" role="alert">
+            Total Amount (Incl. 18% GST): <b id="modalTotalAmount">₹0</b>
+        </div>
+        <p class="small text-muted mb-0">Scan with GPay, PhonePe, or Paytm. No actual transaction will occur.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center">
+        <button type="button" id="confirmPaymentBtn" class="btn btn-success px-4 py-2 fw-bold w-100">
+            I Have Scanned & Paid
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calculator & Modal Trigger Script -->
+<script>
     const pricePerNight = Number("<%= listing.price %>") || 0;
     const checkInInput = document.getElementById("checkIn");
     const checkOutInput = document.getElementById("checkOut");
     const summaryBox = document.getElementById("price-summary");
+    const bookingForm = document.getElementById("bookingForm");
+    const payModalBtn = document.getElementById("payModalBtn");
+    const confirmPaymentBtn = document.getElementById("confirmPaymentBtn");
+
+    let currentCalculatedTotal = 0;
 
     function calculateBookingTotal() {
         if (checkInInput && checkOutInput && checkInInput.value && checkOutInput.value) {
@@ -187,12 +217,12 @@
             if (nights > 0) {
                 const base = pricePerNight * nights;
                 const gst = Math.round(base * 0.18);
-                const total = base + gst;
+                currentCalculatedTotal = base + gst;
 
                 document.getElementById("night-calc").innerText = `₹${pricePerNight.toLocaleString('en-IN')} x ${nights} night${nights > 1 ? 's' : ''}`;
                 document.getElementById("base-price").innerText = `₹${base.toLocaleString('en-IN')}`;
                 document.getElementById("gst-price").innerText = `₹${gst.toLocaleString('en-IN')}`;
-                document.getElementById("total-price").innerText = `₹${total.toLocaleString('en-IN')}`;
+                document.getElementById("total-price").innerText = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
 
                 summaryBox.style.display = "block";
             } else {
@@ -204,6 +234,27 @@
     if(checkInInput && checkOutInput) {
         checkInInput.addEventListener("change", calculateBookingTotal);
         checkOutInput.addEventListener("change", calculateBookingTotal);
+    }
+
+    // Modal Trigger Logic
+    if(payModalBtn) {
+        payModalBtn.addEventListener("click", function() {
+            if(!checkInInput.value || !checkOutInput.value) {
+                alert("Please select Check-in and Check-out dates first!");
+                return;
+            }
+            document.getElementById("modalTotalAmount").innerText = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
+            
+            const payModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            payModal.show();
+        });
+    }
+
+    // Submit Booking on Confirmation
+    if(confirmPaymentBtn) {
+        confirmPaymentBtn.addEventListener("click", function() {
+            bookingForm.submit();
+        });
     }
 </script>
 <script src="/js/map.js"></script>

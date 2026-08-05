@@ -1,263 +1,67 @@
-<!--  <% layout("/layouts/boilerplate") %>
-<div class="row">
-    <div class="col-8 offset-2">
-        <br><br>
-<body>
+<% layout("/layouts/boilerplate") %>
+<div class="row mt-3">
+  <div class="col-8 offset-2">
     <h3>Create a New Listing</h3>
-    <form method="POST" action="/listings">
-        <div class="mb-3">
+    <form method="POST" action="/listings" enctype="multipart/form-data" class="needs-validation" novalidate>
+      
+      <div class="mb-3">
         <label for="title" class="form-label">Title</label>
-        <input name="listing[title]" placeholder="Add a catchy title" type="text" class="form-control">
-        </div>
-        
-        <div class="mb-3">
+        <input name="listing[title]" placeholder="Add a catchy title" type="text" class="form-control" required />
+      </div>
+
+      <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <textarea name="listing[description]" placeholder="enter description" class="form-control"></textarea>
-        </div>
-        
-        <div class="mb-3">
-        <label for="image" class="form-label">Image Link</label>
-        <input name="listing[image]" placeholder="enter image URL/Link" type="text" class="form-control">
-        </div>
-        
-        <div class="row">
+        <textarea name="listing[description]" class="form-control" required></textarea>
+      </div>
+
+      <!-- Property Image -->
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload Property Image</label>
+        <input name="listing[image]" type="file" class="form-control" required />
+      </div>
+
+      <!-- 💳 Owner Payment QR Code Upload Field -->
+      <div class="mb-3">
+        <label for="qrCode" class="form-label fw-bold text-primary">Upload Your Payment Scanner/QR Code (GPay/PhonePe/Paytm)</label>
+        <input name="listing[qrCode]" type="file" class="form-control" />
+        <div class="form-text">Guests will scan this QR to pay for their bookings.</div>
+      </div>
+
+      <div class="row">
         <div class="mb-3 col-md-4">
-        <label for="price" class="form-label">Price</label>
-        <input name="listing[price]" placeholder="1200" type="number" class="form-control">
+          <label for="price" class="form-label">Price</label>
+          <input name="listing[price]" placeholder="1200" type="number" class="form-control" required />
         </div>
 
         <div class="mb-3 col-md-8">
-        <label for="country" class="form-label">Country</label>
-        <input name="listing[country]" placeholder="India" type="text" class="form-control">
+          <label for="country" class="form-label">Country</label>
+          <input name="listing[country]" placeholder="India" type="text" class="form-control" required />
         </div>
-        </div>
-        
-        <div class="mb-3">
+      </div>
+
+      <div class="mb-3">
         <label for="location" class="form-label">Location</label>
-        <input name="listing[location]" placeholder="Purba Medinipur,West Bengal" type="text" class="form-control" >
-        </div>
+        <input name="listing[location]" placeholder="Goa" type="text" class="form-control" required />
+      </div>
 
-        <br><br>
-        <button class="btn btn-dark add-btn">ADD</button>
-        <br><br>
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select name="listing[category]" class="form-select" required>
+          <option value="trending">Trending</option>
+          <option value="rooms">Rooms</option>
+          <option value="iconic cities">Iconic Cities</option>
+          <option value="mountains">Mountains</option>
+          <option value="castles">Castles</option>
+          <option value="pools">Pools</option>
+          <option value="camping">Camping</option>
+          <option value="farms">Farms</option>
+          <option value="beach">Beach</option>
+          <option value="islands">Islands</option>
+          <option value="houseboats">Houseboats</option>
+        </select>
+      </div>
+
+      <button class="btn btn-dark edit-btn mt-3 mb-3">Add Listing</button>
     </form>
-
-
-</body>
-    </div>
-</div> -->
-
-
-<!-- <% layout("/layouts/boilerplate") %>
-
-<div class="row mt-3">
-    <div class="col-8 offset-2">
-
-        <h3>Create a New Listing</h3>
-
-        <form method="POST" action="/listings" novalidate class="needs-validation">
-
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input
-                    type="text"
-                    name="listing[title]"
-                    class="form-control"
-                    placeholder="Add a catchy title"
-                    required
-                >
-            </div>
-
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea
-                    name="listing[description]"
-                    class="form-control"
-                    placeholder="Enter description"
-                    required
-                ></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label for="image" class="form-label">Image Link</label>
-                <input
-                    type="text"
-                    name="listing[image]"
-                    class="form-control"
-                    placeholder="Enter image URL/Link"
-                >
-            </div>
-
-            <div class="row">
-                <div class="mb-3 col-md-4">
-                    <label for="price" class="form-label">Price</label>
-                    <input
-                        type="number"
-                        name="listing[price]"
-                        class="form-control"
-                        placeholder="1200"
-                        required
-                    >
-                </div>
-
-                <div class="mb-3 col-md-8">
-                    <label for="country" class="form-label">Country</label>
-                    <input
-                        type="text"
-                        name="listing[country]"
-                        class="form-control"
-                        placeholder="India"
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input
-                    type="text"
-                    name="listing[location]"
-                    class="form-control"
-                    placeholder="Purba Medinipur, West Bengal"
-                    required
-                >
-            </div>
-
-            <button type="submit" class="btn btn-dark add-btn">
-                ADD
-            </button>
-
-        </form>
-
-    </div>
-</div> -->
-
-
-
-<% layout("/layouts/boilerplate") %>
-
-<div class="row mt-3">
-    <div class="col-8 offset-2">
-
-        <h3>Create a New Listing</h3>
-
-        <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
-
-            <!-- Title -->
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input
-                    id="title"
-                    type="text"
-                    name="listing[title]"
-                    class="form-control"
-                    placeholder="Add a catchy title"
-                    required
-                >
-                <div class="valid-feedback">Title looks good!</div>
-                <div class="invalid-feedback">Please enter a valid title.</div>
-            </div>
-
-            <!-- Description -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea
-                    id="description"
-                    name="listing[description]"
-                    class="form-control"
-                    placeholder="Enter description"
-                    required
-                ></textarea>
-                <div class="invalid-feedback">Please enter a short description.</div>
-            </div>
-
-            <!-- Image File -->
-            <div class="mb-3">
-                <label for="image" class="form-label">Upload Listing Image</label>
-                <input
-                    id="image"
-                    type="file"
-                    name="listing[image]"
-                    class="form-control"
-                    required
-                >
-            </div>
-
-            <!-- Price & Country Row -->
-            <div class="row">
-                <div class="mb-3 col-md-4">
-                    <label for="price" class="form-label">Price</label>
-                    <input
-                        id="price"
-                        type="number"
-                        name="listing[price]"
-                        class="form-control"
-                        placeholder="1200"
-                        required
-                    >
-                    <div class="invalid-feedback">Price should be a valid number.</div>
-                </div>
-
-                <div class="mb-3 col-md-8">
-                    <label for="country" class="form-label">Country</label>
-                    <input
-                        id="country"
-                        type="text"
-                        name="listing[country]"
-                        class="form-control"
-                        placeholder="India"
-                        required
-                    >
-                    <div class="invalid-feedback">Country name is required.</div>
-                </div>
-            </div>
-
-            <!-- Category Select Dropdown (All Categories Added) -->
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select id="category" name="listing[category]" class="form-select" required>
-                    <option value="" disabled selected>Choose a category</option>
-                    <option value="trending">Trending</option>
-                    <option value="rooms">Rooms</option>
-                    <option value="iconic cities">Iconic Cities</option>
-                    <option value="mountains">Mountains</option>
-                    <option value="castles">Castles</option>
-                    <option value="pools">Amazing Pools</option>
-                    <option value="camping">Camping</option>
-                    <option value="farms">Farms</option>
-                    <option value="domes">Domes</option>
-                    <option value="arctic">Arctic</option>
-                    <option value="boats">Boats</option>
-                    <option value="beach">Beachfront</option>
-                    <option value="islands">Islands</option>
-                    <option value="tropical">Tropical</option>
-                    <option value="deserts">Deserts</option>
-                    <option value="golfing">Golfing</option>
-                    <option value="skiing">Skiing</option>
-                    <option value="houseboats">Houseboats</option>
-                </select>
-                <div class="invalid-feedback">Please select a category.</div>
-            </div>
-
-            <!-- Location -->
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input
-                    id="location"
-                    type="text"
-                    name="listing[location]"
-                    class="form-control"
-                    placeholder="Purba Medinipur, West Bengal"
-                    required
-                >
-                <div class="invalid-feedback">Location should be valid.</div>
-            </div>
-
-            <button type="submit" class="btn btn-dark add-btn mt-3 mb-3">
-                ADD
-            </button>
-
-        </form>
-
-    </div>
+  </div>
 </div>
