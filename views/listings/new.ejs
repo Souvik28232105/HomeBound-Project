@@ -20,11 +20,11 @@
         <input name="listing[image]" type="file" class="form-control" required />
       </div>
 
-      <!-- 💳 Owner Payment QR Code Upload Field -->
+      <!-- 💳 Owner Payment QR Code Upload Field (Required) -->
       <div class="mb-3">
         <label for="qrCode" class="form-label fw-bold text-primary">Upload Your Payment Scanner/QR Code (GPay/PhonePe/Paytm)</label>
-        <input name="listing[qrCode]" type="file" class="form-control" />
-        <div class="form-text">Guests will scan this QR to pay for their bookings.</div>
+        <input name="listing[qrCode]" type="file" class="form-control" required />
+        <div class="invalid-feedback">Please upload your payment scanner QR code.</div>
       </div>
 
       <div class="row">
