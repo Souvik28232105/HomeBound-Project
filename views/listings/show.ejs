@@ -40,19 +40,17 @@
         </div>
     <% } %>
 
-    <!-- 📅 Standard Booking Card (Visible to Everyone EXCEPT the owner of this listing) -->
+    <!-- 📅 Booking Card (Visible to Everyone EXCEPT the owner of this listing) -->
     <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
         <div class="col-6 offset-3 mb-4 mt-2">
             <div class="card p-3 shadow-sm border rounded-4">
                 <h4 class="mb-3">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %> <small class="text-muted fw-normal">/ night</small></h4>
                 
                 <% if(!currUser) { %>
-                    <!-- Logged Out User -->
                     <div class="alert alert-warning text-center m-0" role="alert">
                         Please <a href="/login" class="alert-link">Log in</a> to reserve this listing.
                     </div>
                 <% } else { %>
-                    <!-- Logged-in Non-Owner Users (Can be any user or an owner of another listing) -->
                     <form id="bookingForm" action="/listings/<%= listing._id %>/book" method="POST" class="needs-validation" novalidate>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
@@ -70,7 +68,7 @@
                             <input type="number" id="guests" name="booking[guests]" class="form-control" min="1" max="10" value="1" required>
                         </div>
 
-                        <!-- Automatic GST & Total Amount Breakdown -->
+                        <!-- Price & GST Calculation Box -->
                         <div id="price-summary" class="mb-3 p-2 bg-light rounded" style="display: none;">
                             <div class="d-flex justify-content-between small text-muted mb-1">
                                 <span id="night-calc">₹0 x 0 nights</span>
@@ -87,6 +85,7 @@
                             </div>
                         </div>
 
+                        <!-- ⚠️ type="button" দেওয়া হয়েছে যাতে ডিরেক্ট বুক না হয়ে মোডাল পপ-আপ খোলে -->
                         <button type="button" id="payModalBtn" class="btn btn-danger w-100 py-2 fw-bold" style="background-color: #fe424d; border: none;">
                             Reserve & Pay
                         </button>
@@ -129,7 +128,6 @@
             <hr>
         <% } %>
         
-        <!-- All Reviews Display -->
         <% if(listing.reviews && listing.reviews.length > 0) { %>
             <p><b>All Reviews</b></p>
             <div class="row">
@@ -159,7 +157,7 @@
     </div>
 </div>
 
-<!-- 💳 Fake UPI Payment Modal showing Listing Owner's QR Scanner -->
+<!-- 💳 Fake UPI Payment Modal (Owner's Dynamic QR Code) -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center p-3">
@@ -170,7 +168,7 @@
       <div class="modal-body">
         <p class="text-muted mb-1">Owner: <b><%= listing.owner ? listing.owner.username : "deepsikhaWander" %></b></p>
         
-        <!-- Owner's Specific QR Code Image -->
+        <!-- Owner QR Image -->
         <div class="my-3">
             <img 
                 id="modalQrCode" 
@@ -236,9 +234,10 @@
         checkOutInput.addEventListener("change", calculateBookingTotal);
     }
 
-    // Modal Trigger Logic
+    // Modal Pop-Up Logic
     if(payModalBtn) {
-        payModalBtn.addEventListener("click", function() {
+        payModalBtn.addEventListener("click", function(e) {
+            e.preventDefault();
             if(!checkInInput.value || !checkOutInput.value) {
                 alert("Please select Check-in and Check-out dates first!");
                 return;
@@ -250,7 +249,7 @@
         });
     }
 
-    // Submit Booking on Confirmation
+    // Submit Booking after Clicking Confirm
     if(confirmPaymentBtn) {
         confirmPaymentBtn.addEventListener("click", function() {
             bookingForm.submit();
