@@ -32,21 +32,18 @@
 
 
 
-// 1. Get Location String and Country from Listing
 let locationStr = listing.location || "";
 let countryStr = listing.country || "";
 let searchQuery = `${locationStr}, ${countryStr}`.trim();
 
-// 2. Initialize Leaflet Map with Default View (Kolkata coordinates fallback)
+// Initialize Leaflet Map
 const map = L.map('map').setView([22.5726, 88.3639], 10);
 
-// 3. OpenStreetMap Tile Layer
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
-// 🔴 4. Custom Red Marker Icon Definition
 const redIcon = L.icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -56,7 +53,6 @@ const redIcon = L.icon({
     shadowSize: [41, 41]
 });
 
-// Function to Render Marker & Popup
 function renderMap(lat, lng) {
     map.setView([lat, lng], 10);
     
@@ -66,7 +62,6 @@ function renderMap(lat, lng) {
         );
 }
 
-// 5. Check if Database already has valid coordinates
 if (
     listing.geometry && 
     listing.geometry.coordinates && 
@@ -77,7 +72,6 @@ if (
     let lat = listing.geometry.coordinates[1];
     renderMap(lat, lng);
 } else {
-    // 6. Dynamic Fetch for Old Listings (Uses Location Name to Find Coordinates)
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
         .then(res => res.json())
         .then(data => {

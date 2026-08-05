@@ -76,11 +76,11 @@ const listingSchema = new Schema({
     url: String,
     filename: String,
   },
-  // 💳 Owner-এর নিজস্ব Payment Scanner (QR Code)
+  // 💳 Owner Specific Payment QR Code
   qrCode: {
     url: {
       type: String,
-      default: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deepsikha@upi&pn=WanderLust"
+      default: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deepsikhabusiness@upi&pn=deepsikhaWander"
     },
     filename: String,
   },
