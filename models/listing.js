@@ -76,7 +76,7 @@ const listingSchema = new Schema({
     url: String,
     filename: String,
   },
-  // 💳 Owner Specific Payment QR Code
+  // 💳 Owner Payment QR Code Scanner
   qrCode: {
     url: {
       type: String,

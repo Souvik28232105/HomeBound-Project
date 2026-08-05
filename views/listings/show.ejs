@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <!-- Edit/Delete Buttons for Owner -->
+    <!-- Edit/Delete Buttons ONLY for the Listing Owner -->
     <% if(currUser && listing.owner && listing.owner._id.equals(currUser._id)){ %>
         <div class="btns col-6 offset-3 d-flex gap-2 mt-2 mb-3">
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn">Edit</a>
@@ -37,7 +37,7 @@
         </div>
     <% } %>
 
-    <!-- Booking Card -->
+    <!-- Booking Card for non-owners -->
     <% if(!currUser || (listing.owner && !listing.owner._id.equals(currUser._id))) { %>
         <div class="col-6 offset-3 mb-4 mt-2">
             <div class="card p-3 shadow-sm border rounded-4">
@@ -187,7 +187,7 @@
   </div>
 </div>
 
-<!-- Safe Data Transport to JS (Without Syntax Errors) -->
+<!-- Safe HTML Data Container for JS -->
 <div id="listing-data" data-listing='<%- JSON.stringify(listing) %>'></div>
 
 <script>
