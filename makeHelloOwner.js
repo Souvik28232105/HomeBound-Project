@@ -2,26 +2,35 @@ const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
 const User = require("./models/user.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+require("dotenv").config();
 
-async function makeOwner() {
-    await mongoose.connect(MONGO_URL);
-    console.log("Connected to Database!");
+const dbUrl = process.env.ATLASDB_URL;
+const username = process.env.TARGET_USERNAME;
 
-    // 'hello world' ইউজারকে খুঁজে বের করা হচ্ছে
-    const user = await User.findOne({ username: "hello world" });
-
-    if (!user) {
-        console.log("❌ 'hello world' নামের কোনো ইউজার পাওয়া যায়নি! আগে ওয়েবসাইটে গিয়ে Sign Up করো।");
-    } else {
-        // সব লিস্টিংয়ের owner হিসেবে 'hello world' কে সেট করে দেওয়া হলো
-        await Listing.updateMany({}, { owner: user._id });
-        console.log("\n==================================================");
-        console.log(" SUCCESS! All listings are now owned by: 'hello world'");
-        console.log("==================================================\n");
-    }
-
-    mongoose.connection.close();
+if (!dbUrl || !username || process.env.CONFIRM_MAKE_OWNER !== "yes") {
+    throw new Error(
+        "Set ATLASDB_URL, TARGET_USERNAME, and CONFIRM_MAKE_OWNER=yes before running this script."
+    );
 }
 
-makeOwner();
+async function makeOwner() {
+    await mongoose.connect(dbUrl);
+    console.log("Connected to Database!");
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+        console.log(`No user found with username '${username}'.`);
+    } else {
+        await Listing.updateMany({}, { owner: user._id });
+        console.log(`All listings are now owned by '${username}'.`);
+    }
+
+    await mongoose.connection.close();
+}
+
+makeOwner().catch(async (err) => {
+    console.error(err.message);
+    await mongoose.connection.close();
+    process.exitCode = 1;
+});

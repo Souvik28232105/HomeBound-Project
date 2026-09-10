@@ -1,5 +1,9 @@
 const Listing = require("../models/listing");
 
+function getUploadedFileUrl(file) {
+    return file.path.startsWith("http") ? file.path : `/uploads/${file.filename}`;
+}
+
 // 1. Index Route with Search & Category Filter
 module.exports.index = async (req, res) => {
     const { category, q } = req.query; // q = search query
@@ -59,14 +63,14 @@ module.exports.createListing = async (req, res) => {
 
     // Handle Property Image Upload (Multer req.files)
     if (req.files && req.files['listing[image]']) {
-        let url = req.files['listing[image]'][0].path;
+        let url = getUploadedFileUrl(req.files['listing[image]'][0]);
         let filename = req.files['listing[image]'][0].filename;
         newListing.image = { url, filename };
     }
 
     // Handle Owner Payment QR Code Upload (Multer req.files)
     if (req.files && req.files['listing[qrCode]']) {
-        let url = req.files['listing[qrCode]'][0].path;
+        let url = getUploadedFileUrl(req.files['listing[qrCode]'][0]);
         let filename = req.files['listing[qrCode]'][0].filename;
         newListing.qrCode = { url, filename };
     }
@@ -77,7 +81,7 @@ module.exports.createListing = async (req, res) => {
         
         let geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${locationQuery}`, {
             headers: {
-                'User-Agent': 'WanderLustApp/1.0'
+                'User-Agent': 'HomeBoundApp/1.0'
             }
         });
         let geoData = await geoRes.json();
@@ -143,7 +147,7 @@ module.exports.updateListing = async (req, res) => {
     try {
         let locationQuery = encodeURIComponent(`${req.body.listing.location}, ${req.body.listing.country || ''}`);
         let geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${locationQuery}`, {
-            headers: { 'User-Agent': 'WanderLustApp/1.0' }
+            headers: { 'User-Agent': 'HomeBoundApp/1.0' }
         });
         let geoData = await geoRes.json();
 
@@ -162,14 +166,14 @@ module.exports.updateListing = async (req, res) => {
 
     // Update Property Image if uploaded
     if (req.files && req.files['listing[image]']) {
-        let url = req.files['listing[image]'][0].path;
+        let url = getUploadedFileUrl(req.files['listing[image]'][0]);
         let filename = req.files['listing[image]'][0].filename;
         listing.image = { url, filename };
     }
 
     // Update QR Code Image if uploaded
     if (req.files && req.files['listing[qrCode]']) {
-        let url = req.files['listing[qrCode]'][0].path;
+        let url = getUploadedFileUrl(req.files['listing[qrCode]'][0]);
         let filename = req.files['listing[qrCode]'][0].filename;
         listing.qrCode = { url, filename };
     }

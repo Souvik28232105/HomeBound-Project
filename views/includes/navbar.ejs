@@ -14,13 +14,97 @@
     padding: 0.5rem 1.25rem;
     font-size: 0.9rem;
   }
+  .homebound-brand {
+    color: #1f2937;
+    text-decoration: none;
+  }
+  .homebound-mark {
+    width: 2.8rem;
+    height: 2.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fe424d;
+    font-size: 2.45rem;
+    font-weight: 700;
+    font-family: "Trebuchet MS", sans-serif;
+    line-height: 1;
+    letter-spacing: -0.2em;
+    transform: skew(-8deg);
+    text-shadow: 1px 1px 0 rgba(254, 66, 77, 0.13);
+  }
+  .homebound-name {
+    color: #222222;
+    font-size: 1.22rem;
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+  .homebound-tagline {
+    color: #6b7280;
+    font-size: 0.61rem;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    line-height: 1.2;
+    margin-top: 0.15rem;
+  }
+  .theme-toggle,
+  .account-menu-toggle {
+    width: 2.8rem;
+    height: 2.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #292929;
+    font-size: 1.12rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .theme-toggle:hover,
+  .account-menu-toggle:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+  }
+  .account-menu-toggle {
+    font-size: 1.25rem;
+  }
+  .account-menu-toggle::after { display: none; }
+  .account-menu .dropdown-menu {
+    min-width: 9rem;
+    border: 1px solid #ececec;
+    border-radius: 0.85rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    padding: 0.5rem;
+  }
+  .account-menu .dropdown-item {
+    border-radius: 0.55rem;
+    font-weight: 600;
+    padding: 0.55rem 0.7rem;
+  }
+  .theme-menu-item {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  @media (max-width: 575px) {
+    .homebound-tagline { display: none; }
+    .homebound-name { font-size: 1.1rem; }
+  }
 </style>
 
 <nav class="navbar navbar-expand-md bg-white border-bottom sticky-top">
   <div class="container-fluid">
-    <!-- Brand Logo -->
-    <a class="navbar-brand d-flex align-items-center gap-2" href="/listings">
-      <i class="fa-solid fa-compass text-danger fa-2x"></i>
+    <!-- HomeBound Brand -->
+    <a class="navbar-brand homebound-brand d-flex align-items-center gap-2" href="/listings" aria-label="HomeBound home">
+      <span class="homebound-mark" aria-hidden="true">H</span>
+      <span class="d-flex flex-column">
+        <span class="homebound-name">HomeBound</span>
+        <small class="homebound-tagline">Stay. Explore. Belong.</small>
+      </span>
     </a>
 
     <!-- Hamburger Toggle Button -->
@@ -29,10 +113,6 @@
     </button>
 
     <div class="collapse navbar-collapse mt-2 mt-md-0" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
-      </div>
-
       <!-- 🔍 Search Bar -->
       <div class="navbar-nav ms-auto me-auto my-2 my-md-0">
         <form class="d-flex" action="/listings" method="GET">
@@ -52,16 +132,33 @@
       </div>
 
       <!-- Right Nav Links -->
-      <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Airbnb your home</a>
-        
+      <div class="navbar-nav ms-auto align-items-md-center gap-2">
+        <a class="nav-link" href="/listings/new">List your home</a>
+
         <% if(!currUser) { %>
-          <a class="nav-link" href="/signup"><b>Sign up</b></a>
-          <a class="nav-link" href="/login"><b>Log in</b></a>
+          <div class="dropdown account-menu">
+            <button class="account-menu-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open account menu">
+              <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/signup">Sign up</a></li>
+              <li><a class="dropdown-item" href="/login">Log in</a></li>
+              <li><button type="button" class="dropdown-item theme-menu-item" id="themeMenuToggle" aria-label="Switch to dark mode">Dark mode</button></li>
+            </ul>
+          </div>
         <% } %>
 
         <% if(currUser) { %>
-          <a class="nav-link" href="/logout"><b>Log out</b></a>
+          <span class="nav-link text-muted">Hi, <b><%= currUser.username %></b></span>
+          <div class="dropdown account-menu">
+            <button class="account-menu-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open account menu">
+              <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><button type="button" class="dropdown-item theme-menu-item" id="themeMenuToggle" aria-label="Switch to dark mode">Dark mode</button></li>
+              <li><a class="dropdown-item" href="/logout">Log out</a></li>
+            </ul>
+          </div>
         <% } %>
       </div>
     </div>

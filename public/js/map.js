@@ -1,30 +1,4 @@
-// // 1. Check if listing geometry coordinates exist
-// // GeoJSON array formats coordinates as [Longitude, Latitude]
-// let lat = 28.6139;  // Default Delhi Latitude
-// let lng = 77.2090;  // Default Delhi Longitude
 
-// if (
-//     listing.geometry && 
-//     listing.geometry.coordinates && 
-//     listing.geometry.coordinates.length === 2
-// ) {
-//     lng = listing.geometry.coordinates[0];
-//     lat = listing.geometry.coordinates[1];
-// }
-
-// // 2. Initialize Leaflet Map with [lat, lng]
-// const map = L.map('map').setView([lat, lng], 10);
-
-// // 3. OpenStreetMap Tiles
-// L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//     maxZoom: 19,
-//     attribution: '&copy; OpenStreetMap'
-// }).addTo(map);
-
-// // 4. Add Marker and Popup for the exact location
-// L.marker([lat, lng]).addTo(map)
-//     .bindPopup(`<b>${listing.title}</b><br>${listing.location}`)
-//     .openPopup();
 
 
 

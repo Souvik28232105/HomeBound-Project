@@ -1,5 +1,6 @@
-// DNS lookup error (ECONNREFUSED) সমাধান করার জন্য
+// DNS lookup error correction
 const dns = require("dns");
+const crypto = require("crypto");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 if (process.env.NODE_ENV != "production") {
@@ -29,8 +30,18 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const bookingRouter = require("./routes/booking.js");
 
-// Fallback logic for local database
-const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const isProduction = process.env.NODE_ENV === "production";
+
+// Fallback logic for local development database
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/homebound";
+
+if (isProduction && !process.env.ATLASDB_URL) {
+    throw new Error("ATLASDB_URL must be set in production.");
+}
+
+if (isProduction && !process.env.SECRET) {
+    throw new Error("SECRET must be set in production.");
+}
 
 main()
     .then(() => {
@@ -53,7 +64,9 @@ app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 // Session Store Setup
-const secretKey = process.env.SECRET || "mysupersecretcode";
+// An ephemeral secret is acceptable for local development only. Production
+// requires a stable, private SECRET so sessions remain secure across restarts.
+const secretKey = process.env.SECRET || crypto.randomBytes(32).toString("hex");
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -72,11 +85,13 @@ const sessionOptions = {
     store: store,
     secret: secretKey,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true
+        httpOnly: true,
+        sameSite: "lax",
+        secure: isProduction,
     }
 };
 
@@ -103,16 +118,6 @@ app.use((req, res, next) => {
 // Root Route
 app.get("/", (req, res) => {
     res.redirect("/listings");
-});
-
-// Demo User Route
-app.get("/demouser", async (req, res) => {
-    let fakeUser = new User({
-        email: "trisha@gmail.com",
-        username: "Trisha",
-    });
-    let registeredUser = await User.register(fakeUser, "helloworld");
-    res.send(registeredUser);
 });
 
 // Router Mounting

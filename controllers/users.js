@@ -1,4 +1,4 @@
-const User = require("../models/user.js"); // 👈 User Model Import
+const User = require("../models/user.js"); // User Model Import
 
 // 1. Render Signup Form
 module.exports.renderSignupForm = (req, res) => {
@@ -12,10 +12,10 @@ module.exports.signup = async (req, res, next) => {
         const newUser = new User({ email, username });
         const registeredUser = await User.register(newUser, password);
         
-        // Sign-up হওয়ার সাথে সাথেই Auto-Login
+        // Auto-Login
         req.login(registeredUser, (err) => {
             if (err) return next(err);
-            req.flash("success", "Welcome to Wanderlust!");
+            req.flash("success", "Welcome to HomeBound!");
             res.redirect("/listings");
         });
     } catch (e) {
@@ -31,7 +31,7 @@ module.exports.renderLoginForm = (req, res) => {
 
 // 4. Login Logic
 module.exports.login = async (req, res) => {
-    req.flash("success", "Welcome back to Wanderlust!");
+    req.flash("success", "Welcome back to HomeBound!");
     let redirectUrl = res.locals.redirectUrl || "/listings";
     res.redirect(redirectUrl);
 };

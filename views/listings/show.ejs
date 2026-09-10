@@ -12,7 +12,7 @@
             alt="listing_image"
         >
         <div class="card-body">
-            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "deepsikhaWander" %></i></p>
+            <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "HomeBound Host" %></i></p>
 
             <% if(listing.category) { %>
                 <p class="card-text text-capitalize">
@@ -162,7 +162,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-muted mb-1">Listing Owner: <b><%= listing.owner ? listing.owner.username : "deepsikhaWander" %></b></p>
+        <p class="text-muted mb-1">Listing Owner: <b><%= listing.owner ? listing.owner.username : "HomeBound Host" %></b></p>
         
         <div class="my-3">
             <img 

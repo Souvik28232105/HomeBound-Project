@@ -4,7 +4,7 @@ const Listing = require("../models/listing");
 const Booking = require("../models/booking");
 const { isLoggedIn } = require("../middleware");
 
-// 🎟️ Create Booking Route (Always 18% GST Included)
+// Create Booking Route (Always 18% GST Included)
 router.post("/", isLoggedIn, async (req, res) => {
     try {
         let { id } = req.params;

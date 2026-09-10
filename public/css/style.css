@@ -18,6 +18,76 @@ body {
     color: #222222 !important;
 }
 
+/* Dark theme */
+html[data-theme="dark"] body {
+    background: #111111;
+    color: #f5f5f5;
+}
+
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .bg-white {
+    background-color: #151515 !important;
+    border-color: #303030 !important;
+}
+
+html[data-theme="dark"] .nav-link,
+html[data-theme="dark"] .homebound-name,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card-text,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] label,
+html[data-theme="dark"] p {
+    color: #f5f5f5 !important;
+}
+
+html[data-theme="dark"] .homebound-tagline,
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .form-text {
+    color: #b7b7b7 !important;
+}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .f-info,
+html[data-theme="dark"] .modal-content {
+    background-color: #1d1d1d !important;
+    border-color: #383838 !important;
+}
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+    background-color: #252525;
+    border-color: #4a4a4a;
+    color: #f5f5f5;
+}
+
+html[data-theme="dark"] .form-control::placeholder { color: #a7a7a7; }
+
+html[data-theme="dark"] .dropdown-item {
+    color: #f5f5f5;
+}
+
+html[data-theme="dark"] .dropdown-item:hover,
+html[data-theme="dark"] .dropdown-item:focus {
+    background-color: #303030;
+    color: #fff;
+}
+
+html[data-theme="dark"] .theme-toggle,
+html[data-theme="dark"] .account-menu-toggle {
+    background-color: #303030;
+    color: #f5f5f5;
+}
+
+html[data-theme="dark"] .theme-toggle:hover,
+html[data-theme="dark"] .account-menu-toggle:hover {
+    background-color: #444;
+}
+
 /* Footer Style */
 .f-info {
     text-align: center;

@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --check app.js && node --check middleware.js && node --check schema.js && node --check routes/booking.js",
+    "migrate:homebound": "node migrateWanderlustToHomebound.js",
+    "seed:homebound": "node init/index.js"
   },
   "keywords": [],
   "author": "",
