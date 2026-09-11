@@ -128,9 +128,10 @@
             <p><b>All Reviews</b></p>
             <div class="row">
                 <% for(let review of listing.reviews) { %>
+                    <% const reviewDisplayName = "HomeBound Guest"; %>
                     <div class="card col-5 ms-3 mb-3">
                         <div class="card-body">
-                            <h5 class="card-title">@<%= review.author ? review.author.username : "Anonymous" %></h5>
+                            <h5 class="card-title">@<%= reviewDisplayName %></h5>
                             <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
                             <p class="card-text"><%= review.comment %></p>
                         </div>
@@ -167,7 +168,7 @@
         <div class="my-3">
             <img 
                 id="modalQrCode" 
-                src="<%= (listing.qrCode && listing.qrCode.url) ? listing.qrCode.url : 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deepsikhabusiness@upi&pn=deepsikhaWander' %>" 
+                src="<%= (listing.qrCode && listing.qrCode.url) ? listing.qrCode.url : 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=homebound@upi&pn=HomeBound' %>" 
                 alt="Owner Payment Scanner" 
                 class="img-fluid border p-2 rounded shadow-sm" 
                 style="max-width: 220px;"

@@ -20,7 +20,7 @@ const listingSchema = new Schema({
   qrCode: {
     url: {
       type: String,
-      default: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deepsikhabusiness@upi&pn=deepsikhaWander"
+      default: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=Souvikbusiness@upi&pn=souvikhomebound"
     },
     filename: String,
   },
