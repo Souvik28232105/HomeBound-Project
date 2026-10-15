@@ -5,12 +5,37 @@
         <h3><%= listing.title %></h3>
     </div>
 
+    <% const galleryImages = listing.images && listing.images.length
+        ? listing.images
+        : (listing.image && listing.image.url
+            ? [listing.image]
+            : [{ url: 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }]); %>
     <div class="card col-6 offset-3 show-card listing-card">
-        <img 
-            src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' %>" 
-            class="card-img-top show-img" 
-            alt="listing_image"
-        >
+        <div id="listingGallery" class="carousel slide listing-gallery" data-bs-ride="carousel">
+            <% if (galleryImages.length > 1) { %>
+                <div class="carousel-indicators">
+                    <% galleryImages.forEach((image, index) => { %>
+                        <button type="button" data-bs-target="#listingGallery" data-bs-slide-to="<%= index %>" class="<%= index === 0 ? 'active' : '' %>" aria-current="<%= index === 0 ? 'true' : 'false' %>" aria-label="Photo <%= index + 1 %>"></button>
+                    <% }) %>
+                </div>
+            <% } %>
+            <div class="carousel-inner">
+                <% galleryImages.forEach((image, index) => { %>
+                    <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                        <img src="<%= image.url %>" class="d-block w-100 show-img" alt="<%= listing.title %> photo <%= index + 1 %>">
+                    </div>
+                <% }) %>
+            </div>
+            <% if (galleryImages.length > 1) { %>
+                <button class="carousel-control-prev" type="button" data-bs-target="#listingGallery" data-bs-slide="prev" aria-label="Previous photo">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#listingGallery" data-bs-slide="next" aria-label="Next photo">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+                <span class="gallery-count"><i class="fa-regular fa-images"></i> <%= galleryImages.length %> photos</span>
+            <% } %>
+        </div>
         <div class="card-body">
             <p class="card-text"><i>Owned by: <%= listing.owner ? listing.owner.username : "HomeBound Host" %></i></p>
 
@@ -99,18 +124,18 @@
             <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
                 <div class="mb-3 mt-3">
                     <label class="form-label">Rating</label>
-                    <fieldset class="starability-slot">
+                    <fieldset class="starability-slot" aria-label="Rating">
                         <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
                         <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-                        <label for="first-rate5" title="Amazing">5 stars</label>
+                        <label for="first-rate5" title="Amazing" aria-label="5 stars"></label>
                         <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-                        <label for="first-rate4" title="Very good">4 stars</label>
+                        <label for="first-rate4" title="Very good" aria-label="4 stars"></label>
                         <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-                        <label for="first-rate3" title="Average">3 stars</label>
+                        <label for="first-rate3" title="Average" aria-label="3 stars"></label>
                         <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-                        <label for="first-rate2" title="Not good">2 stars</label>
+                        <label for="first-rate2" title="Not good" aria-label="2 stars"></label>
                         <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-                        <label for="first-rate1" title="Terrible">1 star</label>
+                        <label for="first-rate1" title="Terrible" aria-label="1 star"></label>
                     </fieldset>
                 </div>
 
@@ -190,14 +215,14 @@
 </div>
 
 <!-- Data Transport -->
-<div id="listing-data" data-listing='<%- JSON.stringify(listing) %>'></div>
+<script id="listing-data" type="application/json"><%- JSON.stringify(listing).replace(/</g, "\\u003c") %></script>
 
 <!-- Booking Logic & Modal Trigger -->
 <script>
     const listingDataEl = document.getElementById("listing-data");
-    const listing = JSON.parse(listingDataEl.dataset.listing);
+    const listing = listingDataEl ? JSON.parse(listingDataEl.textContent || "{}") : {};
 
-    const pricePerNight = Number("<%= listing.price %>") || 0;
+    const pricePerNight = Number(listing.price || "<%= listing.price || 0 %>") || 0;
     const checkInInput = document.getElementById("checkIn");
     const checkOutInput = document.getElementById("checkOut");
     const summaryBox = document.getElementById("price-summary");
@@ -208,26 +233,29 @@
     let currentCalculatedTotal = 0;
 
     function calculateBookingTotal() {
-        if (checkInInput && checkOutInput && checkInInput.value && checkOutInput.value) {
-            const start = new Date(checkInInput.value);
-            const end = new Date(checkOutInput.value);
-            const timeDiff = end.getTime() - start.getTime();
-            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        if (!checkInInput || !checkOutInput || !checkInInput.value || !checkOutInput.value) {
+            if (summaryBox) summaryBox.style.display = "none";
+            return;
+        }
 
-            if (nights > 0) {
-                const base = pricePerNight * nights;
-                const gst = Math.round(base * 0.18);
-                currentCalculatedTotal = base + gst;
+        const start = new Date(checkInInput.value);
+        const end = new Date(checkOutInput.value);
+        const timeDiff = end.getTime() - start.getTime();
+        const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-                document.getElementById("night-calc").innerText = "₹" + pricePerNight.toLocaleString('en-IN') + " x " + nights + " night" + (nights > 1 ? 's' : '');
-                document.getElementById("base-price").innerText = "₹" + base.toLocaleString('en-IN');
-                document.getElementById("gst-price").innerText = "₹" + gst.toLocaleString('en-IN');
-                document.getElementById("total-price").innerText = "₹" + currentCalculatedTotal.toLocaleString('en-IN');
+        if (nights > 0) {
+            const base = pricePerNight * nights;
+            const gst = Math.round(base * 0.18);
+            currentCalculatedTotal = base + gst;
 
-                summaryBox.style.display = "block";
-            } else {
-                summaryBox.style.display = "none";
-            }
+            document.getElementById("night-calc").innerText = "₹" + pricePerNight.toLocaleString('en-IN') + " x " + nights + " night" + (nights > 1 ? 's' : '');
+            document.getElementById("base-price").innerText = "₹" + base.toLocaleString('en-IN');
+            document.getElementById("gst-price").innerText = "₹" + gst.toLocaleString('en-IN');
+            document.getElementById("total-price").innerText = "₹" + currentCalculatedTotal.toLocaleString('en-IN');
+
+            if (summaryBox) summaryBox.style.display = "block";
+        } else if (summaryBox) {
+            summaryBox.style.display = "none";
         }
     }
 
@@ -239,10 +267,12 @@
     if(payModalBtn) {
         payModalBtn.addEventListener("click", function(e) {
             e.preventDefault();
-            if(!checkInInput.value || !checkOutInput.value) {
+            if (!checkInInput || !checkOutInput || !checkInInput.value || !checkOutInput.value) {
                 alert("Please select Check-in and Check-out dates first!");
                 return;
             }
+
+            calculateBookingTotal();
             document.getElementById("modalTotalAmount").innerText = "₹" + currentCalculatedTotal.toLocaleString('en-IN');
             
             const payModal = new bootstrap.Modal(document.getElementById('paymentModal'));
@@ -250,7 +280,7 @@
         });
     }
 
-    if(confirmPaymentBtn) {
+    if(confirmPaymentBtn && bookingForm) {
         confirmPaymentBtn.addEventListener("click", function() {
             bookingForm.submit();
         });

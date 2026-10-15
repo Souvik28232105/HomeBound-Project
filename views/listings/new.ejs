@@ -14,10 +14,11 @@
         <textarea name="listing[description]" class="form-control" required></textarea>
       </div>
 
-      <!-- Property Image -->
+      <!-- Property Gallery -->
       <div class="mb-3">
-        <label for="image" class="form-label">Upload Property Image</label>
-        <input name="listing[image]" type="file" class="form-control" required />
+        <label for="image" class="form-label">Upload Property Photos</label>
+        <input id="image" name="listing[image]" type="file" class="form-control" accept="image/png,image/jpeg" multiple required />
+        <div class="form-text">Choose 1 to 10 JPG or PNG photos. The first photo becomes the cover image.</div>
       </div>
 
       <!-- 💳 Owner Payment QR Code Upload Field (Required) -->

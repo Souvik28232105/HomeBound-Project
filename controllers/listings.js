@@ -1,7 +1,25 @@
 const Listing = require("../models/listing");
+const { cloudinary, useCloudinary } = require("../cloudConfig.js");
 
-function getUploadedFileUrl(file) {
-    return file.path.startsWith("http") ? file.path : `/uploads/${file.filename}`;
+async function uploadFile(file) {
+    const localImage = { url: `/uploads/${file.filename}`, filename: file.filename };
+    if (!useCloudinary) return localImage;
+
+    try {
+        return await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                { folder: "homebound_DEV", resource_type: "image" },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve({ url: result.secure_url, filename: result.public_id });
+                }
+            );
+            stream.end(file.buffer);
+        });
+    } catch (error) {
+        console.warn("Cloudinary upload failed; using local image storage instead.", error.message);
+        return localImage;
+    }
 }
 
 // 1. Index Route with Search & Category Filter
@@ -63,16 +81,13 @@ module.exports.createListing = async (req, res) => {
 
     // Handle Property Image Upload (Multer req.files)
     if (req.files && req.files['listing[image]']) {
-        let url = getUploadedFileUrl(req.files['listing[image]'][0]);
-        let filename = req.files['listing[image]'][0].filename;
-        newListing.image = { url, filename };
+        newListing.images = await Promise.all(req.files['listing[image]'].map(uploadFile));
+        newListing.image = newListing.images[0];
     }
 
     // Handle Owner Payment QR Code Upload (Multer req.files)
     if (req.files && req.files['listing[qrCode]']) {
-        let url = getUploadedFileUrl(req.files['listing[qrCode]'][0]);
-        let filename = req.files['listing[qrCode]'][0].filename;
-        newListing.qrCode = { url, filename };
+        newListing.qrCode = await uploadFile(req.files['listing[qrCode]'][0]);
     }
 
     // Dynamic Location Search using OpenStreetMap Geocoding
@@ -143,6 +158,14 @@ module.exports.updateListing = async (req, res) => {
 
     Object.assign(listing, req.body.listing);
 
+    const removeImages = req.body.removeImages
+        ? (Array.isArray(req.body.removeImages) ? req.body.removeImages : [req.body.removeImages])
+        : [];
+    let galleryImages = listing.images && listing.images.length
+        ? [...listing.images]
+        : (listing.image && listing.image.url ? [listing.image] : []);
+    galleryImages = galleryImages.filter((image) => !removeImages.includes(image.url));
+
     // Fetch NEW Coordinates if Location/Country was updated
     try {
         let locationQuery = encodeURIComponent(`${req.body.listing.location}, ${req.body.listing.country || ''}`);
@@ -164,18 +187,24 @@ module.exports.updateListing = async (req, res) => {
         console.log("Geocoding Update Error:", err);
     }
 
-    // Update Property Image if uploaded
-    if (req.files && req.files['listing[image]']) {
-        let url = getUploadedFileUrl(req.files['listing[image]'][0]);
-        let filename = req.files['listing[image]'][0].filename;
-        listing.image = { url, filename };
+    // Replace only the cover photo when the owner selects a new cover.
+    if (req.files && req.files['listing[coverImage]']) {
+        const coverImage = await uploadFile(req.files['listing[coverImage]'][0]);
+        if (galleryImages.length > 0) galleryImages[0] = coverImage;
+        else galleryImages.unshift(coverImage);
     }
+
+    // Add selected photos to the existing gallery.
+    if (req.files && req.files['listing[image]']) {
+        const additionalImages = await Promise.all(req.files['listing[image]'].map(uploadFile));
+        galleryImages.push(...additionalImages);
+    }
+
+    listing.images = galleryImages;
+    listing.image = galleryImages[0] || { url: "", filename: "" };
 
     // Update QR Code Image if uploaded
     if (req.files && req.files['listing[qrCode]']) {
-        let url = getUploadedFileUrl(req.files['listing[qrCode]'][0]);
-        let filename = req.files['listing[qrCode]'][0].filename;
-        listing.qrCode = { url, filename };
     }
 
     await listing.save();

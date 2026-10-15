@@ -6,9 +6,17 @@ const listingController = require("../controllers/listings.js");
 const multer = require('multer');
 const { storage } = require("../cloudConfig.js");
 
-// Allow uploading BOTH Property Image & QR Code Image
-const upload = multer({ storage }).fields([
-    { name: 'listing[image]', maxCount: 1 },
+// Allow a gallery of up to ten property images per upload plus one payment QR image.
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, callback) => {
+        if (["image/jpeg", "image/png"].includes(file.mimetype)) return callback(null, true);
+        callback(new Error("Please upload a JPG, JPEG, or PNG image."));
+    },
+}).fields([
+    { name: 'listing[image]', maxCount: 10 },
+    { name: 'listing[coverImage]', maxCount: 1 },
     { name: 'listing[qrCode]', maxCount: 1 }
 ]);
 

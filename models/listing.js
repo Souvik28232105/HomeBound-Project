@@ -16,6 +16,12 @@ const listingSchema = new Schema({
     url: String,
     filename: String,
   },
+  images: [
+    {
+      url: String,
+      filename: String,
+    },
+  ],
   // Owner Payment QR Code Scanner
   qrCode: {
     url: {

@@ -34,25 +34,43 @@
                 <div class="invalid-feedback">Please enter a short description.</div>
             </div>
 
-            <!-- Original Image Preview -->
+            <% const galleryImages = listing.images && listing.images.length ? listing.images : (listing.image && listing.image.url ? [listing.image] : []); %>
+
+            <!-- Current Gallery Preview -->
             <div class="mb-3">
-                Original Listing Image <br />
-                <img 
-                    src="<%= originalImageUrl %>" 
-                    alt="listing_image" 
-                    style="width: 250px; height: 150px; object-fit: cover; border-radius: 8px;" 
-                />
+                <p class="mb-2">Current property photos</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <% galleryImages.forEach((image, index) => { %>
+                        <label class="gallery-edit-item">
+                            <img
+                                src="<%= index === 0 ? originalImageUrl : image.url %>"
+                                alt="Current property photo <%= index + 1 %>"
+                                class="gallery-preview"
+                            />
+                            <span><input type="checkbox" name="removeImages" value="<%= image.url %>"> Delete photo <%= index + 1 %></span>
+                        </label>
+                    <% }) %>
+                </div>
             </div>
 
-            <!-- Upload New Image -->
             <div class="mb-3">
-                <label for="image" class="form-label">Upload New Image</label>
+                <label for="coverImage" class="form-label">Replace Cover Photo</label>
+                <input id="coverImage" name="listing[coverImage]" type="file" class="form-control" accept="image/png,image/jpeg">
+                <div class="form-text">This replaces only the first/main photo. All extra gallery photos will stay.</div>
+            </div>
+
+            <!-- Add Gallery Images -->
+            <div class="mb-3">
+                <label for="image" class="form-label">Add Extra Property Photos</label>
                 <input
                     id="image"
                     name="listing[image]"
                     type="file"
                     class="form-control"
+                    accept="image/png,image/jpeg"
+                    multiple
                 >
+                <div class="form-text">Select up to 10 extra photos of rooms, bathrooms, kitchens, or views. Your existing photos will stay.</div>
             </div>
 
             <!-- Price & Country Row -->
